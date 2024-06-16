@@ -1,5 +1,4 @@
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,10 +13,17 @@ public class Main {
     public static volatile boolean selfCheckout2isBusy = false;
     public static volatile boolean selfCheckout3isBusy = false;
     public static List<CustomerThread> selfCheckoutLine = new Vector<>();
-    public static volatile int customerNumberPicked = 1;
+    public static AtomicInteger customerNumberPicked = new AtomicInteger(1);
     public static Vector<CustomerThread> storageRoomLine = new Vector<>();
-
-    public static void main(String[] args) {
+    public static AtomicInteger currentStorageLineIndex = new AtomicInteger(0);
+    public static volatile int currentStorageLineSize = 0;
+    public static ArrayList<StorageClerkThread> availableStorageClerks = new ArrayList<>();
+    public static ArrayList<FloorClerkThread> availableFloorClerks = new ArrayList<>();
+    public static volatile int customersFinished = 0;
+    public static Vector<CustomerThread> customersInOrder = new Vector<>();
+        public static volatile int highestId;
+    public static volatile int lowestId;
+    public static void main(String[] args) throws InterruptedException {
 
          int num_customers = 20;
          int num_floorClerks = 3;
@@ -30,26 +36,35 @@ public class Main {
 
             if (i < num_storageClerks){
                 StorageClerkThread storageClerkThread = new StorageClerkThread(i);
+                availableStorageClerks.add(storageClerkThread);
                 storageClerkThread.start();
             }
 
 /*
-            3 floorClerks are created afterwards, because the progress of customerThreads are dependent on whether
+            3 floorClerks are created afterward, because the progress of customerThreads are dependent on whether
             floorClerks can process them.
  */
             if (i < num_floorClerks){
                 FloorClerkThread floorClerkThread = new FloorClerkThread(i);
+                availableFloorClerks.add(floorClerkThread);
                 floorClerkThread.start();
             }
 
 //          Finally, 20 customers are created and the storytelling begins!
             CustomerThread customerThread = new CustomerThread(i);
+            customersInOrder.add(customerThread);
             customerThread.start();
-
-
-
-
         }
+
+        int k = 20;
+        while(k !=0 ){
+            k--;
+            while(customersInOrder.get(k).isAlive()){
+                highestId = customersInOrder.get(k).customerNumber;
+            }
+        }
+
+
 
 
 

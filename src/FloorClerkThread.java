@@ -3,10 +3,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FloorClerkThread extends Thread{
 
+    public static long time = System.currentTimeMillis();
     public int id;
-
     public AtomicBoolean isWorking = new AtomicBoolean(false);
-
     public FloorClerkThread(int id){
         this.id = id;
     }
@@ -20,7 +19,7 @@ public class FloorClerkThread extends Thread{
 //          Busy wait, to simulate the floor clerk who is waiting for someone to get on the line.
             while((Main.customerLine.size() < (Main.customersServed.get() + 1)) && Main.customersServed.get() < 20){
                 try {
-                    this.sleep(100);
+                    this.sleep(500);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -46,7 +45,7 @@ public class FloorClerkThread extends Thread{
                 CustomerThread currentCustomer = Main.customerLine.get(Main.customersServed.get());
                 currentCustomer.turnInLine = true;
                 currentCustomer.slipNumber = Main.customersServed.get() + 1;
-                System.out.println("FloorClerk " +id+ ":      Served customer " + currentCustomer.customerNumber +
+                System.out.println("["+(System.currentTimeMillis()-time)+"] "+"FloorClerk " +id+ ":      Served customer " + currentCustomer.customerNumber +
                         " slip number " + currentCustomer.slipNumber);
                 Main.customersServed.getAndIncrement();
                 //Resets the index to once again determine which floorClerk will arrive to the next customer.
@@ -58,11 +57,11 @@ public class FloorClerkThread extends Thread{
 
 //      Thread leaves the while(customersServed < 20) loop, meaning that
 //      every customer in the store has been served
-        System.out.println("FloorClerk " +id+ ":      All the customers are served, now I'll rest!");
+        System.out.println("["+(System.currentTimeMillis()-time)+"] "+"FloorClerk " +id+ ":      All the customers are served, now I'll rest!");
         try {
-            this.sleep(10000);
+            this.sleep(30000);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            System.out.println("["+(System.currentTimeMillis()-time)+"] "+"Store is closing, FloorClerk "+ this.id + " has been interrupted...");
         }
 
 
